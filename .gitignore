@@ -1,0 +1,5 @@
+data/cut/*
+bin/*.pyc
+lib/*.pyc
+.idea
+data/test/*
