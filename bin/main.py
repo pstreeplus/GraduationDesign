@@ -12,7 +12,12 @@ import preProcess
 
 class Main(object):
     """
-    测试主模块:
+    主模块:
+        1.预处理
+        2.特征提取
+        3.训练模型
+        4.识别
+        5.评估
     """
 
     def __init__(self, file_names=[], cfg='../conf/main.cfg'):
