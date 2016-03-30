@@ -13,8 +13,9 @@ class PreProcess(object):
 
     def gray(self):
         for i in xrange(len(self.images)):
+            self.images[i] = self.images[i].convert('RGB')
             image = self.images[i]
-            r, g, b = image.split()[:3]
+            r, g, b = image.split()
             x, y = image.size
             for j in xrange(x):
                 for k in xrange(y):
@@ -44,6 +45,7 @@ class PreProcess(object):
     def division(self):
         self.binaryzation()
         for image in self.images:
+            image.show()
             self.__cutting(image)
 
     @staticmethod
@@ -72,9 +74,9 @@ class PreProcess(object):
         """
         x = [2 * min(x)] + x + [max(x)]
         for i in xrange(len(x) - 1):
-            if x[i] <= x[0] and x[i + 1] != x[0]:
+            if x[i] <= x[0] < x[i + 1]:
                 bounds.append(i)
-            elif x[i] != x[0] and x[i + 1] <= x[0]:
+            elif x[i] > x[0] >= x[i + 1]:
                 bounds.append(i - 1)
         for i in xrange(0, len(x), 2):
             if i + 1 < len(bounds) and bounds[i + 1] - bounds[i] >= 4:
