@@ -19,11 +19,13 @@ class PreProcess(object):
             file_names = [file_names]
         self.file_names = file_names
         if conf:
-            PreProcess.cut_dir = conf.get('DEFAULT', 'cut_dir')
+            PreProcess.cut_dir = conf.get('PREPROCESS', 'cut_dir')
+            PreProcess.char_width = conf.getint('PREPROCESS', 'char_width')
         else:
+            PreProcess.char_width = 3
             PreProcess.cut_dir = '../data/cut/'
 
-    def gray(self):
+    def __gray(self):
         """
         :return: self.images
 
@@ -44,7 +46,7 @@ class PreProcess(object):
             self.images[i] = r
         return self.images
 
-    def binaryzation(self):
+    def __binaryzation(self):
         """
         :return: self.images
 
@@ -54,7 +56,7 @@ class PreProcess(object):
         self.images = [Image.open(file_name)
                 for file_name in self.file_names]
         self.images = [image.filter(ImageFilter.MedianFilter()) for image in self.images]
-        self.gray()
+        self.__gray()
         for i in xrange(len(self.images)):
             image = self.images[i]
             x, y = image.size
@@ -70,9 +72,11 @@ class PreProcess(object):
 
         字符分割
         """
-        self.binaryzation()
-        for image in self.images:
-            self.__cutting(image)
+        self.__binaryzation()
+        image_names = []
+        for i, image in enumerate(self.images):
+            image_names.extend(self.__cutting(image, i))
+        return image_names
 
     @staticmethod
     def __projection(image, func=lambda a, b: a):
@@ -115,9 +119,9 @@ class PreProcess(object):
         return image
 
     @staticmethod
-    def __cutting(image):
+    def __cutting(image, pic_idx):
         """
-        :param image:
+        :param image, pic_idx:
         :return: image_names
 
         切分字符，并保存
@@ -134,8 +138,9 @@ class PreProcess(object):
             elif x[i] > x[0] >= x[i + 1]:
                 bounds.append(i - 1)
         for i in xrange(0, len(x), 2):
-            if i + 1 < len(bounds) and bounds[i + 1] - bounds[i] >= 4:
+            if i + 1 < len(bounds) and bounds[i + 1] - bounds[i] >= PreProcess.char_width:
                 image_char = image.crop((bounds[i], 0, bounds[i + 1], image.size[1]))
-                image_name.append(PreProcess.cut_dir + '%d.png' % cnt)
+                image_name.append(PreProcess.cut_dir + '%04d%d.png' % (pic_idx, cnt))
                 PreProcess.__correct_char(image_char).save(image_name[-1])
                 cnt += 1
+        return image_name

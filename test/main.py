@@ -12,7 +12,7 @@ import preProcess
 
 class Main(object):
     """
-    测试主模块:
+    测试模块:
     """
 
     def __init__(self, file_names=[], cfg='../conf/main.cfg'):
