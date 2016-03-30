@@ -3,6 +3,14 @@
 
 
 class PreProcess(object):
+    """
+    图像预处理模块：
+        1.图像灰度化
+        2.灰度图像二值化
+        3.二值图像矫正
+        4.单个字符切分
+        5.单个字符矫正
+    """
 
     def __init__(self, file_names=[], conf=None):
         if not file_names:
@@ -16,6 +24,11 @@ class PreProcess(object):
             PreProcess.cut_dir = '../data/cut/'
 
     def gray(self):
+        """
+        :return: self.images
+
+        图像灰度化
+        """
         for i in xrange(len(self.images)):
             self.images[i] = self.images[i].convert('RGB')
             image = self.images[i]
@@ -32,11 +45,15 @@ class PreProcess(object):
         return self.images
 
     def binaryzation(self):
+        """
+        :return: self.images
+
+        图像二值化
+        """
         from PIL import Image, ImageFilter
         self.images = [Image.open(file_name)
                 for file_name in self.file_names]
         self.images = [image.filter(ImageFilter.MedianFilter()) for image in self.images]
-        self.images = [image.convert('RGB') for image in self.images]
         self.gray()
         for i in xrange(len(self.images)):
             image = self.images[i]
@@ -48,36 +65,68 @@ class PreProcess(object):
         return self.images
 
     def division(self):
+        """
+        :return:
+
+        字符分割
+        """
         self.binaryzation()
         for image in self.images:
             self.__cutting(image)
 
     @staticmethod
-    def __projection(image):
+    def __projection(image, func=lambda a, b: a):
+        """
+        :param image:
+        :return: ret
+
+        将像素向X轴或者Y轴投影, 默认向X轴进行投影
+        """
         x, y = image.size
-        xs = [0] * x
-        ys = [0] * y
+        ret = [0] * func(x, y)
         for i in xrange(y):
             for j in xrange(x):
                 pixel = 1 if image.getpixel((j, i)) == 255 else 0
-                xs[j] += pixel
-                ys[i] += pixel
-        return xs, ys
+                ret[func(j, i)] += pixel
+        return ret
 
     @staticmethod
-    def __correct(image):
-        x = []
-        y = []
+    def __correct_image(image):
+        #TODO
+        """
+        :param image:
+        :return: image
 
-        return image, x, y
+        对整个图像进行矫正
+        """
+
+        return image
+
+    @staticmethod
+    def __correct_char(image):
+        #TODO
+        """
+        :param image:
+        :return: image
+
+        对整个单个字符进行矫正
+        """
+
+        return image
 
     @staticmethod
     def __cutting(image):
-        image, x, y = PreProcess.__correct(image)
-        x, y = PreProcess.__projection(image)
-        image.show()
+        """
+        :param image:
+        :return: image_names
+
+        切分字符，并保存
+        """
+        image = PreProcess.__correct_image(image)
+        x = PreProcess.__projection(image)
         cnt = 0
         bounds = []
+        image_name = []
         x = [min(x)] + x + [max(x)]
         for i in xrange(len(x) - 1):
             if x[i] <= x[0] < x[i + 1]:
@@ -86,6 +135,7 @@ class PreProcess(object):
                 bounds.append(i - 1)
         for i in xrange(0, len(x), 2):
             if i + 1 < len(bounds) and bounds[i + 1] - bounds[i] >= 4:
-                image.crop((bounds[i], 0, bounds[i + 1], image.size[1]))\
-                    .save(PreProcess.cut_dir + '%d.png' % cnt)
+                image_char = image.crop((bounds[i], 0, bounds[i + 1], image.size[1]))
+                image_name.append(PreProcess.cut_dir + '%d.png' % cnt)
+                PreProcess.__correct_char(image_char).save(image_name[-1])
                 cnt += 1
