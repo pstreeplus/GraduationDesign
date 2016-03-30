@@ -17,7 +17,8 @@ class Main(object):
         2.特征提取
         3.训练模型
         4.识别
-        5.评估
+        5.后处理
+        6.模型评估
     """
 
     def __init__(self, file_names=[], cfg='../conf/main.cfg'):
