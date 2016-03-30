@@ -19,4 +19,15 @@ An OCR Model To Distinguish Student Number Or Verification Code
 ##预处理
 
 
+##特征提取
+
+
+##训练模型
+
+
+##识别
+
+
+##模型评估
+
 #使用
