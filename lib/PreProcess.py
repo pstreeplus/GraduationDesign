@@ -3,18 +3,38 @@
 
 
 class PreProcess(object):
+    """
+    图像预处理模块：
+        1.图像灰度化
+        2.灰度图像二值化
+        3.二值图像矫正
+        4.单个字符切分
+        5.单个字符矫正
+    """
 
-    def __init__(self, file_names=[]):
+    def __init__(self, file_names=[], conf=None):
         if not file_names:
             raise ValueError('PreProcess init, argument can not be empty.')
         if not isinstance(file_names, list):
             file_names = [file_names]
         self.file_names = file_names
+        if conf:
+            PreProcess.cut_dir = conf.get('PREPROCESS', 'cut_dir')
+            PreProcess.char_width = conf.getint('PREPROCESS', 'char_width')
+        else:
+            PreProcess.char_width = 3
+            PreProcess.cut_dir = '../data/cut/'
 
-    def gray(self):
+    def __gray(self):
+        """
+        :return: self.images
+
+        图像灰度化
+        """
         for i in xrange(len(self.images)):
+            self.images[i] = self.images[i].convert('RGB')
             image = self.images[i]
-            r, g, b = image.split()[:3]
+            r, g, b = image.split()
             x, y = image.size
             for j in xrange(x):
                 for k in xrange(y):
@@ -26,58 +46,101 @@ class PreProcess(object):
             self.images[i] = r
         return self.images
 
-    def binaryzation(self):
+    def __binaryzation(self):
+        """
+        :return: self.images
+
+        图像二值化
+        """
         from PIL import Image, ImageFilter
         self.images = [Image.open(file_name)
                 for file_name in self.file_names]
         self.images = [image.filter(ImageFilter.MedianFilter()) for image in self.images]
-        self.gray()
+        self.__gray()
         for i in xrange(len(self.images)):
             image = self.images[i]
             x, y = image.size
             for j in xrange(x):
                 for k in xrange(y):
-                    pixel = 255 if image.getpixel((j, k)) > 127 else 0
+                    pixel = 0 if image.getpixel((j, k)) > 127 else 255
                     self.images[i].putpixel((j, k), pixel)
         return self.images
 
     def division(self):
-        self.binaryzation()
-        for image in self.images:
-            self.__cutting(image)
+        """
+        :return:
+
+        字符分割
+        """
+        self.__binaryzation()
+        image_names = []
+        for i, image in enumerate(self.images):
+            image_names.extend(self.__cutting(image, i))
+        return image_names
 
     @staticmethod
-    def __projection(image):
+    def __projection(image, func=lambda a, b: a):
+        """
+        :param image:
+        :return: ret
+
+        将像素向X轴或者Y轴投影, 默认向X轴进行投影
+        """
         x, y = image.size
-        xs = [0] * x
-        ys = [0] * y
+        ret = [0] * func(x, y)
         for i in xrange(y):
             for j in xrange(x):
-                pixel = 1 if image.getpixel((j, i)) == 0 else 0
-                xs[j] += pixel
-                ys[i] += pixel
-        return xs, ys
+                pixel = 1 if image.getpixel((j, i)) == 255 else 0
+                ret[func(j, i)] += pixel
+        return ret
 
     @staticmethod
-    def __cutting(image):
-        x, y = PreProcess.__projection(image)
+    def __correct_image(image):
+        #TODO
+        """
+        :param image:
+        :return: image
+
+        对整个图像进行矫正
+        """
+
+        return image
+
+    @staticmethod
+    def __correct_char(image):
+        #TODO
+        """
+        :param image:
+        :return: image
+
+        对整个单个字符进行矫正
+        """
+
+        return image
+
+    @staticmethod
+    def __cutting(image, pic_idx):
+        """
+        :param image, pic_idx:
+        :return: image_names
+
+        切分字符，并保存
+        """
+        image = PreProcess.__correct_image(image)
+        x = PreProcess.__projection(image)
         cnt = 0
         bounds = []
-        """
-        all_pixel = float(sum(x))
-        x = [value / all_pixel for value in x]
-        minx = min(x)
-        x = [minx if v <= 0.01 else v for v in x]
-        print x
-        """
-        x = [2 * min(x)] + x + [max(x)]
+        image_name = []
+        x = [min(x)] + x + [max(x)]
         for i in xrange(len(x) - 1):
-            if x[i] <= x[0] and x[i + 1] != x[0]:
+            if x[i] <= x[0] < x[i + 1]:
                 bounds.append(i)
-            elif x[i] != x[0] and x[i + 1] <= x[0]:
+            elif x[i] > x[0] >= x[i + 1]:
                 bounds.append(i - 1)
         for i in xrange(0, len(x), 2):
-            if i + 1 < len(bounds) and bounds[i + 1] - bounds[i] >= 4:
-                image.crop((bounds[i], 0, bounds[i + 1], image.size[1])).save('../data/cut/cut_%d.png' % cnt)
+            if i + 1 < len(bounds) and bounds[i + 1] - bounds[i] >= PreProcess.char_width:
+                image_char = image.crop((bounds[i], 0, bounds[i + 1], image.size[1]))
+                image_name.append(PreProcess.cut_dir + '%04d%d.png' % (pic_idx, cnt))
+                PreProcess.__correct_char(image_char).save(image_name[-1])
                 cnt += 1
-
+        return image_name

@@ -7,10 +7,19 @@ import sys
 import ConfigParser
 
 sys.path.append('../lib')
-import PreProcess
+import preProcess
 
 
 class Main(object):
+    """
+    主模块:
+        1.预处理
+        2.特征提取
+        3.训练模型
+        4.识别
+        5.后处理
+        6.模型评估
+    """
 
     def __init__(self, file_names=[], cfg='../conf/main.cfg'):
         self.conf = ConfigParser.ConfigParser()
@@ -30,16 +39,10 @@ class Main(object):
                 os.path.join(self.pic_dir, self.conf.get('PREPROCESS', 'extend_name')))
         if not self.file_names:
             raise ValueError('no files are specifed.')
-        self.preprocess = PreProcess.PreProcess(self.file_names)
+        self.preprocess = preProcess.PreProcess(self.file_names, self.conf)
 
     def lauch(self):
         self.preprocess.division()
-        """
-        self.images = self.preprocess.binaryzation()
-        for (image, file_name) in zip(self.images, self.file_names):
-            file_name = '_bin'.join(os.path.splitext(file_name))
-            image.save(file_name)
-        """
 
 if __name__ == '__main__':
     Main().lauch()

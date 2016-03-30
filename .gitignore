@@ -1,5 +1,6 @@
 data/cut/*
 bin/*.pyc
+bin/*.txt
 lib/*.pyc
 .idea
 data/test/*
