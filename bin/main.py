@@ -7,7 +7,7 @@ import sys
 import ConfigParser
 
 sys.path.append('../lib')
-import preProcess
+import PreProcess
 
 
 class Main(object):
@@ -39,7 +39,7 @@ class Main(object):
                 os.path.join(self.pic_dir, self.conf.get('PREPROCESS', 'extend_name')))
         if not self.file_names:
             raise ValueError('no files are specifed.')
-        self.preprocess = preProcess.PreProcess(self.file_names, self.conf)
+        self.preprocess = PreProcess.PreProcess(self.file_names, self.conf)
 
     def lauch(self):
         self.preprocess.division()

@@ -1,6 +1,8 @@
 #! /usr/bin/env python
 # -*- coding:utf-8 -*-
 
+from PIL import Image, ImageFilter
+
 
 class PreProcess(object):
     """
@@ -53,7 +55,6 @@ class PreProcess(object):
 
         图像二值化
         """
-        from PIL import Image, ImageFilter
         self.images = [Image.open(file_name)
                 for file_name in self.file_names]
         self.images = [image.filter(ImageFilter.MedianFilter()) for image in self.images]
@@ -103,7 +104,6 @@ class PreProcess(object):
 
         获取数组的宽度,作为图像投影后的宽度
         """
-        y1 = 0
         y2 = 0
         ret = 0
         width = 0
@@ -111,8 +111,6 @@ class PreProcess(object):
         for i in xrange(len(bounds)):
             if bounds[i] != minv:
                 width += 1
-                if width == 1:
-                    y1 = i + 1
             else:
                 width = 0
             if ret < width:
@@ -121,10 +119,17 @@ class PreProcess(object):
         if not get_bounds:
             return ret
         else:
-            return y1, y2
+            return y2 - ret + 1, y2
 
     @staticmethod
-    def __correct_image(image, func=lambda a, b: a >= b):
+    def __extend_image(image):
+        x, y = image.size
+        new_image = Image.new('L', (x + 40, y + 40))
+        new_image.paste(image, (20, 20, x + 20, y + 20))
+        return new_image
+
+    @staticmethod
+    def __correct_image(image, func=lambda a, b: b):
         #TODO
         """
         :param image:
@@ -132,20 +137,23 @@ class PreProcess(object):
 
         对整个图像进行矫正
         """
+        image = PreProcess.__extend_image(image)
         ret = image
-        width = image.size[1]
+        width = image.size[0]
+        if func(1, 2) == 2:
+            width = image.size[1]
         for i in xrange(1, 46):
             tmp_image = image.rotate(i)
-            tmp_width = PreProcess.__get_width(PreProcess.__projection(tmp_image, lambda a, b: b))
-            if func(width, tmp_width):
+            tmp_width = PreProcess.__get_width(PreProcess.__projection(tmp_image, func))
+            if width >= tmp_width:
                 width = tmp_width
                 ret = tmp_image
             else:
                 break
         for i in xrange(1, 46):
             tmp_image = image.rotate(-i)
-            tmp_width = PreProcess.__get_width(PreProcess.__projection(tmp_image, lambda a, b: b))
-            if func(width, tmp_width):
+            tmp_width = PreProcess.__get_width(PreProcess.__projection(tmp_image, func))
+            if width >= tmp_width:
                 width = tmp_width
                 ret = tmp_image
             else:
@@ -161,9 +169,12 @@ class PreProcess(object):
 
         对整个单个字符进行矫正, 并切分出字符
         """
-        image = PreProcess.__correct_image(image, lambda a, b: a <= b)
+        image = PreProcess.__correct_image(image, lambda a, b: a)
+        x1, x2 = PreProcess.__get_width(PreProcess.__projection(image), True)
         y1, y2 = PreProcess.__get_width(PreProcess.__projection(image, lambda a, b: b), True)
-        image = image.crop((0, y1, image.size[0], y2))
+        print x1, x2, y1, y2
+        print image.size
+        image = image.crop((x1, y1, x2, y2))
         return image
 
     @staticmethod
