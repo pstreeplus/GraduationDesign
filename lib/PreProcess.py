@@ -96,24 +96,32 @@ class PreProcess(object):
         return ret
 
     @staticmethod
-    def __get_width(bounds):
+    def __get_width(bounds, get_bounds=False):
         """
         :param bounds (list of int)
         :return ret (image)
 
         获取数组的宽度,作为图像投影后的宽度
         """
+        y1 = 0
+        y2 = 0
         ret = 0
         width = 0
         minv = min(bounds)
         for i in xrange(len(bounds)):
             if bounds[i] != minv:
                 width += 1
+                if width == 1:
+                    y1 = i + 1
             else:
                 width = 0
             if ret < width:
                 ret = width
-        return ret
+                y2 = i + 1
+        if not get_bounds:
+            return ret
+        else:
+            return y1, y2
 
     @staticmethod
     def __correct_image(image, func=lambda a, b: a >= b):
@@ -151,9 +159,12 @@ class PreProcess(object):
         :param image:
         :return: image
 
-        对整个单个字符进行矫正
+        对整个单个字符进行矫正, 并切分出字符
         """
-        return PreProcess.__correct_image(image, lambda a, b: a <= b)
+        image = PreProcess.__correct_image(image, lambda a, b: a <= b)
+        y1, y2 = PreProcess.__get_width(PreProcess.__projection(image, lambda a, b: b), True)
+        image = image.crop((0, y1, image.size[0], y2))
+        return image
 
     @staticmethod
     def __cutting(image, pic_idx):
@@ -164,7 +175,6 @@ class PreProcess(object):
         切分字符，并保存
         """
         image = PreProcess.__correct_image(image)
-        image.show()
         x = PreProcess.__projection(image)
         cnt = 0
         bounds = []
