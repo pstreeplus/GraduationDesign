@@ -10,6 +10,7 @@ class PreProcess(object):
         3.二值图像矫正
         4.单个字符切分
         5.单个字符矫正
+        6.字符归一化
     """
 
     def __init__(self, file_names=[], conf=None):
@@ -23,7 +24,7 @@ class PreProcess(object):
             PreProcess.char_width = conf.getint('PREPROCESS', 'char_width')
         else:
             PreProcess.char_width = 3
-            PreProcess.cut_dir = '../data/cut/'
+            PreProcess.cut_dir = '..d/ata/cut/'
 
     def __gray(self):
         """
@@ -95,7 +96,27 @@ class PreProcess(object):
         return ret
 
     @staticmethod
-    def __correct_image(image):
+    def __get_width(bounds):
+        """
+        :param bounds (list of int)
+        :return ret (image)
+
+        获取数组的宽度,作为图像投影后的宽度
+        """
+        ret = 0
+        width = 0
+        minv = min(bounds)
+        for i in xrange(len(bounds)):
+            if bounds[i] != minv:
+                width += 1
+            else:
+                width = 0
+            if ret < width:
+                ret = width
+        return ret
+
+    @staticmethod
+    def __correct_image(image, func=lambda a, b: a >= b):
         #TODO
         """
         :param image:
@@ -103,8 +124,25 @@ class PreProcess(object):
 
         对整个图像进行矫正
         """
-
-        return image
+        ret = image
+        width = image.size[1]
+        for i in xrange(1, 46):
+            tmp_image = image.rotate(i)
+            tmp_width = PreProcess.__get_width(PreProcess.__projection(tmp_image, lambda a, b: b))
+            if func(width, tmp_width):
+                width = tmp_width
+                ret = tmp_image
+            else:
+                break
+        for i in xrange(1, 46):
+            tmp_image = image.rotate(-i)
+            tmp_width = PreProcess.__get_width(PreProcess.__projection(tmp_image, lambda a, b: b))
+            if func(width, tmp_width):
+                width = tmp_width
+                ret = tmp_image
+            else:
+                break
+        return ret
 
     @staticmethod
     def __correct_char(image):
@@ -115,8 +153,7 @@ class PreProcess(object):
 
         对整个单个字符进行矫正
         """
-
-        return image
+        return PreProcess.__correct_image(image, lambda a, b: a <= b)
 
     @staticmethod
     def __cutting(image, pic_idx):
@@ -127,6 +164,7 @@ class PreProcess(object):
         切分字符，并保存
         """
         image = PreProcess.__correct_image(image)
+        image.show()
         x = PreProcess.__projection(image)
         cnt = 0
         bounds = []
