@@ -77,7 +77,7 @@ class PreProcess(object):
         self.__binaryzation()
         image_names = []
         for i, image in enumerate(self.images):
-            image_names.extend(self.__cutting(image, i))
+            image_names.append(self.__cutting(image, i))
         return image_names
 
     @staticmethod
@@ -185,6 +185,7 @@ class PreProcess(object):
         """
         image = PreProcess.__correct_image(image)
         x = PreProcess.__projection(image)
+        return image.convert('RGB')
         image.show()
         cnt = 0
         bounds = []

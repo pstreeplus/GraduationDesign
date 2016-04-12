@@ -6,54 +6,48 @@ import sys
 import subprocess
 
 
-OCR = 'StuNoOcr'
-NAME = "Ans.bmp"
-NAME_ROOT = "Ans"
+class Recognization(object):
+    """识别模块"""
 
+    def __init__(self, ocr='StuNoOcr', name='Ans.bmp'):
+        self.OCR = ocr
+        self.NAME = name
+        self.NAME_ROOT = os.path.splitext(name)[0]
 
-def call_tesseract(input_filename, output_filename):
-    args = [OCR, input_filename, output_filename]
-    proc = subprocess.Popen(args, stderr=subprocess.PIPE)
-    proc.wait()
+    def call_my_model(self, file_name):
+        args = [self.OCR, file_name, self.NAME_ROOT]
+        proc = subprocess.Popen(args, stderr=subprocess.PIPE)
+        return proc.wait()
 
-
-def image_to_string(im):
-    try:
-        image_to_scratch(im)
-        call_tesseract(NAME, NAME_ROOT)
-        text = get_text()
-    finally:
-        clean_up()
-    return text
-
-
-def image_file_to_string(filename):
-    try:
+    def recognize_from_im(self, im):
         try:
-            call_tesseract(filename, NAME_ROOT)
-            text = get_text()
-        except Exception as e:
-            e = '[FATAL]: Format Error'
-            print >> sys.stderr, e
-    finally:
-        clean_up()
-    return text
+            self.image_to_scratch(im)
+            self.call_my_model(self.NAME)
+            text = self.get_text()
+        finally:
+            self.clean_up()
+        return text
 
-
-def image_to_scratch(im):
-    im.save(NAME, dpi=(200, 200))
-
-
-def get_text():
-    inf = file(NAME_ROOT + '.txt')
-    text = inf.read()
-    inf.close()
-    return text
-
-
-def clean_up():
-    for name in (NAME, NAME_ROOT + '.txt'):
+    def recognize_from_file_name(self, file_name):
         try:
-            os.remove(name)
-        except OSError:
-            pass
+            self.call_my_model(file_name)
+            text = self.get_text()
+        finally:
+            self.clean_up()
+        return text
+
+    def image_to_scratch(self, im):
+        im.save(self.NAME, dpi=(200, 200))
+
+    def get_text(self):
+        inf = file(self.NAME_ROOT + '.txt')
+        text = inf.read()
+        inf.close()
+        return text
+
+    def clean_up(self):
+        for name in (self.NAME, self.NAME_ROOT + '.txt'):
+            try:
+                os.remove(name)
+            except OSError:
+                pass

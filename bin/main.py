@@ -8,7 +8,8 @@ import ConfigParser
 
 sys.path.append('../lib')
 import PreProcess
-import Recognization
+from Recognization import Recognization
+
 
 class Main(object):
     """
@@ -40,11 +41,13 @@ class Main(object):
         if not self.file_names:
             raise ValueError('no files are specifed.')
         self.preprocess = PreProcess.PreProcess(self.file_names, self.conf)
+        self.recognize = Recognization()
 
     def lauch(self):
-        self.preprocess.division()
+        for im in self.preprocess.division():
+            im.show()
+            print self.recognize.recognize_from_im(im)
 
 if __name__ == '__main__':
     Main().lauch()
-    #print '1244q324'
-    #print Recognization.image_file_to_string('../data/resource/3.png').strip()
+    #print Recognization().recognize_from_file_name('../data/resource/3.png').strip()
