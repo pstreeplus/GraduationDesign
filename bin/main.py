@@ -8,7 +8,7 @@ import ConfigParser
 
 sys.path.append('../lib')
 import PreProcess
-
+import Recognization
 
 class Main(object):
     """
@@ -46,3 +46,5 @@ class Main(object):
 
 if __name__ == '__main__':
     Main().lauch()
+    #print '1244q324'
+    #print Recognization.image_file_to_string('../data/resource/3.png').strip()

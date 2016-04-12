@@ -172,8 +172,6 @@ class PreProcess(object):
         image = PreProcess.__correct_image(image, lambda a, b: a)
         x1, x2 = PreProcess.__get_width(PreProcess.__projection(image), True)
         y1, y2 = PreProcess.__get_width(PreProcess.__projection(image, lambda a, b: b), True)
-        print x1, x2, y1, y2
-        print image.size
         image = image.crop((x1, y1, x2, y2))
         return image
 
@@ -187,6 +185,7 @@ class PreProcess(object):
         """
         image = PreProcess.__correct_image(image)
         x = PreProcess.__projection(image)
+        image.show()
         cnt = 0
         bounds = []
         image_name = []
