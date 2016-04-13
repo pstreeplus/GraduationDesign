@@ -172,7 +172,7 @@ class PreProcess(object):
         image = PreProcess.__correct_image(image, lambda a, b: a)
         x1, x2 = PreProcess.__get_width(PreProcess.__projection(image), True)
         y1, y2 = PreProcess.__get_width(PreProcess.__projection(image, lambda a, b: b), True)
-        image = image.crop((x1, y1, x2, y2))
+        image = image.crop((0, y1, image.size[0], y2))
         return image
 
     @staticmethod
@@ -184,9 +184,8 @@ class PreProcess(object):
         切分字符，并保存
         """
         image = PreProcess.__correct_image(image)
-        x = PreProcess.__projection(image)
         return image.convert('RGB')
-        image.show()
+        x = PreProcess.__projection(image)
         cnt = 0
         bounds = []
         image_name = []
@@ -200,6 +199,6 @@ class PreProcess(object):
             if i + 1 < len(bounds) and bounds[i + 1] - bounds[i] >= PreProcess.char_width:
                 image_char = image.crop((bounds[i], 0, bounds[i + 1], image.size[1]))
                 image_name.append(PreProcess.cut_dir + '%04d%d.png' % (pic_idx, cnt))
-                PreProcess.__correct_char(image_char).save(image_name[-1])
+                PreProcess.__correct_char(image_char).convert('RGB').save(image_name[-1])
                 cnt += 1
         return image_name
