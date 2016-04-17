@@ -6,14 +6,14 @@ import sys
 from PyQt4 import QtGui, QtCore
 
 
-class Front(object):
+class Front(QtGui.QWidget)):
     """前端展示界面程序"""
 
     def __init__(self):
-        pass
+        super(Front, self).__init__()
 
     def launch(self):
-        pass
+
 
 
 if __name__ == '__main__':
