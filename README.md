@@ -33,6 +33,7 @@ An OCR Model To Distinguish Student Number Or Verification Code
 
 >5.单个字符矫正
 
+>6.字符归一化
 
 ##特征提取
 
