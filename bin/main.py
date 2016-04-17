@@ -45,7 +45,7 @@ class Main(object):
 
     def lauch(self):
         for im in self.preprocess.division():
-            im.show()
+            #im.show()
             print self.recognize.recognize_from_im(im)
 
 if __name__ == '__main__':
