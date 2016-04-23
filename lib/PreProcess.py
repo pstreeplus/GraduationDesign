@@ -15,12 +15,12 @@ class PreProcess(object):
         6.字符归一化
     """
 
-    def __init__(self, file_names=[], conf=None):
-        if not file_names:
-            raise ValueError('PreProcess init, argument can not be empty.')
-        if not isinstance(file_names, list):
-            file_names = [file_names]
-        self.file_names = file_names
+    def __init__(self, file_name, conf=None):
+        if not file_name:
+            raise ValueError('PreProcess init, file_name can not be empty.')
+        if not isinstance(file_name, str):
+            raise TypeError('PreProcess init, file_name must type of string')
+        self.file_name = file_name
         if conf:
             PreProcess.cut_dir = conf.get('PREPROCESS', 'cut_dir')
             PreProcess.char_width = conf.getint('PREPROCESS', 'char_width')
@@ -34,39 +34,37 @@ class PreProcess(object):
 
         图像灰度化
         """
-        for i in xrange(len(self.images)):
-            self.images[i] = self.images[i].convert('RGB')
-            image = self.images[i]
-            r, g, b = image.split()
-            x, y = image.size
-            for j in xrange(x):
-                for k in xrange(y):
-                    pixelr = r.getpixel((j, k))
-                    pixelg = g.getpixel((j, k))
-                    pixelb = b.getpixel((j, k))
-                    pixel = int(0.3 * pixelr + 0.59 * pixelg + 0.11 * pixelb)
-                    r.putpixel((j, k), pixel)
-            self.images[i] = r
-        return self.images
+        self.image = self.image.convert('RGB')
+        image = self.image
+        r, g, b = image.split()
+        x, y = image.size
+        for j in xrange(x):
+            for k in xrange(y):
+                pixelr = r.getpixel((j, k))
+                pixelg = g.getpixel((j, k))
+                pixelb = b.getpixel((j, k))
+                pixel = int(0.3 * pixelr + 0.59 * pixelg + 0.11 * pixelb)
+                r.putpixel((j, k), pixel)
+        self.image = r
+        return self.image
 
     def __binaryzation(self):
         """
-        :return: self.images
+        :return: ret_images
 
         图像二值化
         """
-        self.images = [Image.open(file_name)
-                for file_name in self.file_names]
-        self.images = [image.filter(ImageFilter.MedianFilter()) for image in self.images]
-        self.__gray()
-        for i in xrange(len(self.images)):
-            image = self.images[i]
-            x, y = image.size
-            for j in xrange(x):
-                for k in xrange(y):
-                    pixel = 0 if image.getpixel((j, k)) > 127 else 255
-                    self.images[i].putpixel((j, k), pixel)
-        return self.images
+        self.image = Image.open(self.file_name)
+        yield self.image
+        self.image = self.image.filter(ImageFilter.MedianFilter())
+        yield self.__gray()
+        image = self.image
+        x, y = image.size
+        for j in xrange(x):
+            for k in xrange(y):
+                pixel = 0 if self.image.getpixel((j, k)) > 127 else 255
+                self.image.putpixel((j, k), pixel)
+        yield self.image
 
     def division(self):
         """
@@ -74,11 +72,10 @@ class PreProcess(object):
 
         字符分割
         """
-        self.__binaryzation()
-        image_names = []
-        for i, image in enumerate(self.images):
-            image_names.append(self.__cutting(image, i))
-        return image_names
+        for im in self.__binaryzation():
+            yield im
+        for im in self.__cutting(self.image):
+            yield im
 
     @staticmethod
     def __projection(image, func=lambda a, b: a):
@@ -170,13 +167,13 @@ class PreProcess(object):
         对整个单个字符进行矫正, 并切分出字符
         """
         image = PreProcess.__correct_image(image, lambda a, b: a)
-        x1, x2 = PreProcess.__get_width(PreProcess.__projection(image), True)
+        #x1, x2 = PreProcess.__get_width(PreProcess.__projection(image), True)
         y1, y2 = PreProcess.__get_width(PreProcess.__projection(image, lambda a, b: b), True)
         image = image.crop((0, y1, image.size[0], y2))
         return image
 
     @staticmethod
-    def __cutting(image, pic_idx):
+    def __cutting(image):
         """
         :param image, pic_idx:
         :return: image_names
@@ -184,7 +181,9 @@ class PreProcess(object):
         切分字符，并保存
         """
         image = PreProcess.__correct_image(image)
-        return image.convert('RGB')
+        yield image.convert('RGB')
+
+        """
         x = PreProcess.__projection(image)
         cnt = 0
         bounds = []
@@ -202,3 +201,4 @@ class PreProcess(object):
                 PreProcess.__correct_char(image_char).convert('RGB').save(image_name[-1])
                 cnt += 1
         return image_name
+        """

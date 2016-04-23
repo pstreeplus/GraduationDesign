@@ -1,4 +1,6 @@
+*/*.pyc
 data/cut/*
+data/preprocess/*
 bin/*.pyc
 bin/*.txt
 lib/*.pyc
