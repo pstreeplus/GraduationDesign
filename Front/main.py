@@ -6,7 +6,7 @@ import sys
 from PyQt4 import QtGui, QtCore
 sys.path.append('../bin')
 sys.path.append('../lib')
-import core
+import coreApi
 from Recognization import Recognization
 
 
@@ -33,7 +33,7 @@ class Front(QtGui.QWidget):
     def launch(self):
         self.pic_index = -1
         self.pic_paths = []
-        self.core = core.Main.get_inter_pics(core.Main())
+        self.core = coreApi.Main.get_inter_pics(core.Main())
         self.next_pic.clicked.connect(self.show_next_pic)
         self.prev_pic.clicked.connect(self.show_prev_pic)
         self.show_next_pic()

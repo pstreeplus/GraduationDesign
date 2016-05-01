@@ -13,7 +13,7 @@ from Recognization import Recognization
 
 class Main(object):
     """
-    主模块:
+    测试主模块:
         1.预处理
         2.特征提取
         3.训练模型
@@ -50,4 +50,3 @@ class Main(object):
 
 if __name__ == '__main__':
     Main().launch()
-    #Main().get_inter_pics()

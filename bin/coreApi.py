@@ -13,7 +13,7 @@ from Recognization import Recognization
 
 class Main(object):
     """
-    主模块:
+    核心模块API:
         1.预处理
         2.特征提取
         3.训练模型
