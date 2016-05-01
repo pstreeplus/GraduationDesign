@@ -33,10 +33,6 @@ class Main(object):
         self.preprocess = PreProcess.PreProcess(self.file_name, self.conf)
         self.recognize = Recognization()
 
-    def launch(self):
-        for im in self.preprocess.division():
-            print self.recognize.recognize_from_im(im)
-
     @staticmethod
     def get_inter_pics(preprocess):
         index = 0

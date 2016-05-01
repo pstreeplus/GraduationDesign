@@ -37,16 +37,6 @@ class Main(object):
         for im in self.preprocess.division():
             print self.recognize.recognize_from_im(im)
 
-    @staticmethod
-    def get_inter_pics(preprocess):
-        index = 0
-        for im in preprocess.preprocess.division():
-            im = im.convert('RGB')
-            png_name = preprocess.pre_dir + str(index) + '.png'
-            im.save(png_name)
-            yield png_name
-            index += 1
-
 
 if __name__ == '__main__':
     Main().launch()
