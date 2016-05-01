@@ -24,9 +24,13 @@ class PreProcess(object):
         if conf:
             PreProcess.cut_dir = conf.get('PREPROCESS', 'cut_dir')
             PreProcess.char_width = conf.getint('PREPROCESS', 'char_width')
+            PreProcess.width = conf.getint('Normal', 'width')
+            PreProcess.height = conf.getint('Normal', 'height')
         else:
             PreProcess.char_width = 3
             PreProcess.cut_dir = '../data/cut/'
+            PreProcess.width = 64
+            PreProcess.height = 64
 
     def __gray(self):
         """
@@ -185,7 +189,7 @@ class PreProcess(object):
         """
 
         image = PreProcess.__correct_image(image)
-        yield image.convert('RGB')
+        yield image
 
         x = PreProcess.__projection(image)
         bounds = []
@@ -198,5 +202,6 @@ class PreProcess(object):
         for i in xrange(0, len(x), 2):
             if i + 1 < len(bounds) and bounds[i + 1] - bounds[i] >= PreProcess.char_width:
                 image_char = image.crop((bounds[i], 0, bounds[i + 1], image.size[1]))
-                sig_char_image = PreProcess.__correct_char(image_char).convert('RGB').resize((64, 64))
+                sig_char_image = PreProcess.__correct_char(image_char)
+                sig_char_image = sig_char_image.resize((PreProcess.width, PreProcess.height))
                 yield sig_char_image

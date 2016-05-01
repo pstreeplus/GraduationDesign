@@ -47,5 +47,7 @@ class Main(object):
             yield png_name
             index += 1
 
+
 if __name__ == '__main__':
-    Main().get_inter_pics()
+    Main().launch()
+    #Main().get_inter_pics()

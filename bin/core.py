@@ -49,4 +49,5 @@ class Main(object):
 
 
 if __name__ == '__main__':
-    Main().get_inter_pics()
+    Main().launch()
+    #Main().get_inter_pics()
