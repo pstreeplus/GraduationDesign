@@ -13,7 +13,7 @@ from Recognization import Recognization
 
 class Main(object):
     """
-    核心模块API:
+    核心模块:
         1.预处理
         2.特征提取
         3.训练模型
@@ -33,16 +33,6 @@ class Main(object):
         self.preprocess = PreProcess.PreProcess(self.file_name, self.conf)
         self.recognize = Recognization()
 
-    @staticmethod
-    def get_inter_pics(preprocess):
-        index = 0
-        for im in preprocess.preprocess.division():
-            im = im.convert('RGB')
-            png_name = preprocess.pre_dir + str(index) + '.png'
-            im.save(png_name)
-            yield png_name
-            index += 1
-
 
 if __name__ == '__main__':
-    Main().get_inter_pics()
+    pass
