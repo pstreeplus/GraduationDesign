@@ -9,6 +9,7 @@ sys.path.append('../lib')
 import core
 from Recognization import Recognization
 
+
 class Front(QtGui.QWidget):
     """前端展示界面程序"""
 

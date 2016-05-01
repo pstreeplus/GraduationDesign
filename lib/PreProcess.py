@@ -26,7 +26,7 @@ class PreProcess(object):
             PreProcess.char_width = conf.getint('PREPROCESS', 'char_width')
         else:
             PreProcess.char_width = 3
-            PreProcess.cut_dir = '..d/ata/cut/'
+            PreProcess.cut_dir = '../data/cut/'
 
     def __gray(self):
         """
@@ -34,6 +34,7 @@ class PreProcess(object):
 
         图像灰度化
         """
+
         self.image = self.image.convert('RGB')
         image = self.image
         r, g, b = image.split()
@@ -54,6 +55,7 @@ class PreProcess(object):
 
         图像二值化
         """
+
         self.image = Image.open(self.file_name)
         yield self.image
         self.image = self.image.filter(ImageFilter.MedianFilter())
@@ -72,6 +74,7 @@ class PreProcess(object):
 
         字符分割
         """
+
         for im in self.__binaryzation():
             yield im
         for im in self.__cutting(self.image):
@@ -85,6 +88,7 @@ class PreProcess(object):
 
         将像素向X轴或者Y轴投影, 默认向X轴进行投影
         """
+
         x, y = image.size
         ret = [0] * func(x, y)
         for i in xrange(y):
@@ -101,6 +105,7 @@ class PreProcess(object):
 
         获取数组的宽度,作为图像投影后的宽度
         """
+
         y2 = 0
         ret = 0
         width = 0
@@ -127,13 +132,13 @@ class PreProcess(object):
 
     @staticmethod
     def __correct_image(image, func=lambda a, b: b):
-        #TODO
         """
         :param image:
         :return: image
 
         对整个图像进行矫正
         """
+
         image = PreProcess.__extend_image(image)
         ret = image
         width = image.size[0]
@@ -159,15 +164,14 @@ class PreProcess(object):
 
     @staticmethod
     def __correct_char(image):
-        #TODO
         """
         :param image:
         :return: image
 
         对整个单个字符进行矫正, 并切分出字符
+
         """
-        image = PreProcess.__correct_image(image, lambda a, b: a)
-        #x1, x2 = PreProcess.__get_width(PreProcess.__projection(image), True)
+
         y1, y2 = PreProcess.__get_width(PreProcess.__projection(image, lambda a, b: b), True)
         image = image.crop((0, y1, image.size[0], y2))
         return image
@@ -175,19 +179,16 @@ class PreProcess(object):
     @staticmethod
     def __cutting(image):
         """
-        :param image, pic_idx:
-        :return: image_names
+        :param image:
 
         切分字符，并保存
         """
+
         image = PreProcess.__correct_image(image)
         yield image.convert('RGB')
 
-        """
         x = PreProcess.__projection(image)
-        cnt = 0
         bounds = []
-        image_name = []
         x = [min(x)] + x + [max(x)]
         for i in xrange(len(x) - 1):
             if x[i] <= x[0] < x[i + 1]:
@@ -197,8 +198,5 @@ class PreProcess(object):
         for i in xrange(0, len(x), 2):
             if i + 1 < len(bounds) and bounds[i + 1] - bounds[i] >= PreProcess.char_width:
                 image_char = image.crop((bounds[i], 0, bounds[i + 1], image.size[1]))
-                image_name.append(PreProcess.cut_dir + '%04d%d.png' % (pic_idx, cnt))
-                PreProcess.__correct_char(image_char).convert('RGB').save(image_name[-1])
-                cnt += 1
-        return image_name
-        """
+                sig_char_image = PreProcess.__correct_char(image_char).convert('RGB').resize((64, 64))
+                yield sig_char_image
