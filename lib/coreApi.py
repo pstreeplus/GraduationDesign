@@ -1,6 +1,10 @@
 #! /usr/bin/env python
 # -*- coding:utf-8 -*-
 
+"""
+核心模块API, 前端调用接口:
+"""
+
 import os
 import glob
 import sys
@@ -10,11 +14,8 @@ import PreProcess
 from Recognization import Recognization
 
 
-class CoreAPI(object):
-    """
-    核心模块API, 前端调用接口:
-    """
 
+class CoreAPI(object):
     def __init__(self, cfg='../conf/main.cfg'):
         self.conf = ConfigParser.ConfigParser()
         self.conf.read(cfg)
