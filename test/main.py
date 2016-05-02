@@ -7,8 +7,9 @@ import sys
 import ConfigParser
 
 sys.path.append('../lib')
-import PreProcess
+import PreProcess, splitNormal, featExtract
 from Recognization import Recognization
+from PIL import Image, ImageFilter
 
 
 class Main(object):
@@ -30,13 +31,16 @@ class Main(object):
         self.pre_dir = self.conf.get('DEFAULT', 'pre_dir')
         train_pic = self.conf.get('PREPROCESS', 'train_pic')
         self.file_name = os.path.join(self.pic_dir, train_pic)
-        self.preprocess = PreProcess.PreProcess(self.file_name, self.conf)
+        self.preprocess = PreProcess.PreProcess
         self.recognize = Recognization()
 
     def launch(self):
-        for im in self.preprocess.division():
-            print self.recognize.recognize_from_im(im)
-
+        image = Image.open(self.file_name)
+        image = self.preprocess.gray(image)
+        image = self.preprocess.binaryzation(image)
+        image = self.preprocess.correct(image)
+        for lb, im in zip('2012061620',splitNormal.SplitNormal.split_char_normal(image)):
+            print featExtract.FeatExtract.featExt(im, lb)
 
 if __name__ == '__main__':
     Main().launch()
