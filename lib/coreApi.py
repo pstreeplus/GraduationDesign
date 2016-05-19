@@ -9,8 +9,9 @@ import os
 import glob
 import sys
 import ConfigParser
+from PIL import Image
 
-import PreProcess
+import PreProcess, splitNormal
 from Recognization import Recognization
 
 
@@ -24,14 +25,34 @@ class CoreAPI(object):
         self.pre_dir = self.conf.get('DEFAULT', 'pre_dir')
         train_pic = self.conf.get('PREPROCESS', 'train_pic')
         self.file_name = os.path.join(self.pic_dir, train_pic)
-        self.preprocess = PreProcess.PreProcess(self.file_name, self.conf)
+        self.preprocess = PreProcess.PreProcess()
+        self.split_normal = splitNormal.SplitNormal()
         self.recognize = Recognization()
 
-def get_inter_pics(preprocess):
-    index = 0
-    for im in preprocess.preprocess.division():
-        im = im.convert('RGB')
-        png_name = preprocess.pre_dir + str(index) + '.png'
-        im.save(png_name)
-        yield png_name
-        index += 1
+def get_inter_pics(coreAPI):
+    yield coreAPI.file_name
+    im = Image.open(coreAPI.file_name)
+    im = coreAPI.preprocess.gray(im)
+    image_name = coreAPI.pre_dir + 'gray.png'
+    im.convert('RGB').save(image_name)
+    yield image_name
+    im = coreAPI.preprocess.binaryzation(im)
+    image_name = coreAPI.pre_dir + 'binary.png'
+    im.convert('RGB').save(image_name)
+    yield image_name
+    im = coreAPI.preprocess.correct(im)
+    image_name = coreAPI.pre_dir + 'correct.png'
+    im.convert('RGB').save(image_name)
+    yield image_name
+    im = coreAPI.split_normal.split_char_normal(im)[-1]
+    image_name = coreAPI.pre_dir + 'line.png'
+    im.convert('RGB').save(image_name)
+    yield image_name
+
+
+def get_text(img_path):
+    return Recognization().recognize_from_file_name(img_path)
+
+
+if __name__ == '__main__':
+    get_inter_pics(CoreAPI())

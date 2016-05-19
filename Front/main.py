@@ -18,6 +18,7 @@ class Front(QtGui.QWidget):
         self.setWindowTitle('OCR Model')
         self.hbox = QtGui.QHBoxLayout(self)
         self.pic_lb = QtGui.QLabel(self)
+        self.pic_lb.setFont(QtGui.QFont("Roman times",30,QtGui.QFont.Bold))
         self.pic_lb.setAlignment(QtCore.Qt.AlignCenter)
         self.hbox.addWidget(self.pic_lb)
         self.setLayout(self.hbox)
@@ -30,6 +31,7 @@ class Front(QtGui.QWidget):
         self.prev_pic.setGeometry(345, 10, 60, 40)
 
     def launch(self):
+        self.text = ''
         self.pic_index = -1
         self.pic_paths = []
         self.core = coreApi.get_inter_pics(coreApi.CoreAPI())
@@ -39,11 +41,12 @@ class Front(QtGui.QWidget):
 
     def show_next_pic(self):
         self.pic_index += 1
-        if self.pic_index == len(self.pic_paths):
+        if self.pic_index >= len(self.pic_paths):
             try:
                 self.pic_paths.append(self.core.next())
             except StopIteration:
                 self.pic_index -= 1
+                self.set_result()
                 return
         pic_path = self.pic_paths[self.pic_index]
         pixmap = QtGui.QPixmap(pic_path)
@@ -57,6 +60,13 @@ class Front(QtGui.QWidget):
         pic_path = self.pic_paths[self.pic_index]
         pixmap = QtGui.QPixmap(pic_path)
         self.pic_lb.setPixmap(pixmap)
+
+    def set_result(self):
+        if not self.text:
+            self.text = coreApi.get_text(self.pic_paths[3])
+        self.pic_index = len(self.pic_paths)
+        self.pic_lb.setText(u'识别结果: ' + self.text)
+
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)

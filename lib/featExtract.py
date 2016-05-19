@@ -19,6 +19,7 @@ class FeatExtract(object):
         提取特征值
         """
 
+        feat = []
         x, y = image.size
         bound_x = util.projection(image)
         bound_y = util.projection(image, lambda a, b: b)
@@ -33,5 +34,6 @@ class FeatExtract(object):
                 local_image = image.crop((x1, y1, x2, y2))
                 feat.append(sum(util.projection(local_image)))
 
+        util.normal(feat)
         feat.append(label)
         return feat

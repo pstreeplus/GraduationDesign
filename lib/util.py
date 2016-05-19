@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 # -*- coding:utf-8 -*-
 
+import math
 from PIL import Image
 
 
@@ -28,7 +29,7 @@ def get_width(bounds, get_bounds=False):
     if not get_bounds:
         return ret
     else:
-        return y2 - ret + 1, y2
+        return y2 - ret, y2
 
 
 def projection(image, func=lambda a, b: a):
@@ -71,3 +72,11 @@ def get_max_min(arr, func=lambda a, b: a < b):
             value = arr[i]
             position = i + 1
     return position, value
+
+def normal(arr):
+    length = 0
+    for value in arr:
+        length += value * value
+    length = math.sqrt(length * 1.0)
+    for i in xrange(len(arr)):
+        arr[i] = int(arr[i]/ length * 10000)

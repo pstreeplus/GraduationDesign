@@ -39,8 +39,11 @@ class Main(object):
         image = self.preprocess.gray(image)
         image = self.preprocess.binaryzation(image)
         image = self.preprocess.correct(image)
+        print Recognization().recognize_from_im(image.convert('RGB'))
         for lb, im in zip('2012061620',splitNormal.SplitNormal.split_char_normal(image)):
-            print featExtract.FeatExtract.featExt(im, lb)
+            pass
+            #im.show()
+            #print featExtract.FeatExtract.featExt(im, lb)
 
 if __name__ == '__main__':
     Main().launch()

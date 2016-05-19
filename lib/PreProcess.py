@@ -32,6 +32,7 @@ class PreProcess(object):
                 pixel = int(0.3 * pixelr + 0.59 * pixelg + 0.11 * pixelb)
                 r.putpixel((j, k), pixel)
         image = r
+        image = image.filter(ImageFilter.MedianFilter())
         return image
 
     @staticmethod
@@ -44,8 +45,9 @@ class PreProcess(object):
         x, y = image.size
         for j in xrange(x):
             for k in xrange(y):
-                pixel = 0 if image.getpixel((j, k)) > 127 else 255
+                pixel = 0 if image.getpixel((j, k)) > 100 else 255
                 image.putpixel((j, k), pixel)
+        image = image.filter(ImageFilter.MedianFilter())
         return image
 
     @staticmethod
