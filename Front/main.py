@@ -64,6 +64,7 @@ class Front(QtGui.QWidget):
     def set_result(self):
         if not self.text:
             self.text = coreApi.get_text(self.pic_paths[3])
+        self.pic_index += 1
         self.pic_index = len(self.pic_paths)
         self.pic_lb.setText(u'识别结果: ' + self.text)
 
